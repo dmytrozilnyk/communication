@@ -1,7 +1,6 @@
 package main
 
 import (
-	userpb "github.com/dmytrozilnyk/communication/grpc/gen/go/proto/user/v1"
 	"log"
 	"net"
 	"time"
@@ -38,8 +37,7 @@ func main() {
 		}
 	}()
 
-	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
-	healthServer.SetServingStatus(userpb.UserService_ServiceDesc.ServiceName, healthpb.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus(wearablepb.WearableService_ServiceDesc.ServiceName, healthpb.HealthCheckResponse_SERVING)
 
 	healthpb.RegisterHealthServer(grpcServer, healthServer)
 	wearablepb.RegisterWearableServiceServer(grpcServer, wearableServer)

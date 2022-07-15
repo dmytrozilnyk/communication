@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"io"
+	"log"
 
 	wearablepb "github.com/dmytrozilnyk/communication/grpc/gen/go/proto/wearable/v1"
 )
@@ -24,23 +23,32 @@ func main() {
 	defer conn.Close()
 
 	client := wearablepb.NewWearableServiceClient(conn)
-	stream, err := client.ConsumeBeatsPerMinute(context.Background())
+	stream, err := client.CalculateBeatsPerMinute(context.Background())
 	if err != nil {
 		log.Fatalln("Consuming stream", err)
 	}
 
-	for i := 0; i < 5; i++ {
-		err := stream.Send(&wearablepb.ConsumeBeatsPerMinuteRequest{Uuid: "Dimi", Value: 100, Minute: uint32(i)})
+	for i := 0; i < 10; i++ {
+		err := stream.Send(&wearablepb.CalculateBeatsPerMinuteRequest{Uuid: "Dimi", Value: uint32(i), Minute: uint32(i)})
 		if err != nil {
 			log.Fatalln("Sending value", err)
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 
-	res, err := stream.CloseAndRecv()
-	if err != nil {
-		log.Fatalln("Closing", err)
+	if err := stream.CloseSend(); err != nil {
+		log.Fatalln("CloseSend", err)
 	}
 
-	fmt.Println("Total messages", res.GetTotal())
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalln("Closing", err)
+		}
+
+		fmt.Println("Total average", res.GetAverage())
+	}
 }
