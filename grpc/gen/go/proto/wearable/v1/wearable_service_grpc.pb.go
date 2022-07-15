@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: proto/v1/wearable_service.proto
+// source: proto/wearable/v1/wearable_service.proto
 
-package wearablepb
+package __
 
 import (
 	context "context"
@@ -266,5 +266,5 @@ var WearableService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "proto/v1/wearable_service.proto",
+	Metadata: "proto/wearable/v1/wearable_service.proto",
 }
