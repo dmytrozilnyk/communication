@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	userpb "github.com/dmytrozilnyk/communication/grpc/gen/go/proto/user/v1"
 	"log"
 	"net"
 	"time"
@@ -10,22 +10,8 @@ import (
 	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	userpb "github.com/dmytrozilnyk/communication/grpc/gen/go/proto/user/v1"
 	wearablepb "github.com/dmytrozilnyk/communication/grpc/gen/go/proto/wearable/v1"
 )
-
-type userService struct {
-	userpb.UnimplementedUserServiceServer
-}
-
-func (u *userService) GetUser(_ context.Context, req *userpb.GetUserRequest) (*userpb.GetUserResponse, error) {
-	return &userpb.GetUserResponse{
-		User: &userpb.User{
-			Uuid:     req.Uuid,
-			FullName: "Mario",
-		},
-	}, nil
-}
 
 func main() {
 	lis, err := net.Listen("tcp", "localhost:9879")
@@ -34,7 +20,6 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	userServer := &userService{}
 	wearableServer := &wearableService{}
 
 	healthServer := health.NewServer()
@@ -47,8 +32,7 @@ func main() {
 				status = healthpb.HealthCheckResponse_NOT_SERVING
 			}
 
-			healthServer.SetServingStatus(userpb.UserService_ServiceDesc.ServiceName, status)
-			healthServer.SetServingStatus("", status)
+			healthServer.SetServingStatus(wearablepb.WearableService_ServiceDesc.ServiceName, status)
 
 			time.Sleep(1 * time.Second)
 		}
@@ -57,7 +41,6 @@ func main() {
 	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus(userpb.UserService_ServiceDesc.ServiceName, healthpb.HealthCheckResponse_SERVING)
 
-	userpb.RegisterUserServiceServer(grpcServer, userServer)
 	healthpb.RegisterHealthServer(grpcServer, healthServer)
 	wearablepb.RegisterWearableServiceServer(grpcServer, wearableServer)
 

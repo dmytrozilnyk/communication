@@ -15,9 +15,7 @@ type wearableService struct {
 	wearablepb.UnimplementedWearableServiceServer
 }
 
-func (w *wearableService) BeatsPerMinute(
-	req *wearablepb.BeatsPerMinuteRequest,
-	stream wearablepb.WearableService_BeatsPerMinuteServer) error {
+func (w *wearableService) BeatsPerMinute(req *wearablepb.BeatsPerMinuteRequest, stream wearablepb.WearableService_BeatsPerMinuteServer) error {
 	for {
 		select {
 		case <-stream.Context().Done():
@@ -76,10 +74,12 @@ func (w *wearableService) CalculateBeatsPerMinute(stream wearablepb.WearableServ
 		count++
 
 		if count%5 == 0 {
-			fmt.Println("Total", total, "Sending", float32(total)/5)
+			average := float32(total) / 5
+
+			fmt.Println("Total", total, "Sending", average)
 
 			if err := stream.Send(&wearablepb.CalculateBeatsPerMinuteResponse{
-				Average: float32(total) / 5,
+				Average: average,
 			}); err != nil {
 				return err
 			}
